@@ -1,3 +1,33 @@
+.lecture-document {
+  padding: 25px;
+  border: 8px solid cornflowerblue;
+  border-radius: 25px;
+  width:80vw;
+  margin: 0 auto;
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.lecture-wrapper {
+  margin-top:20px;
+}
+.lecture-page{
+  background-color:cornflowerblue;
+  margin:10px;
+  padding: 4px;
+  padding-left: 20px;
+  padding-right:20px;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  color:white;
+}
+.lecture-nav-btn{
+  background-color:cornflowerblue;
+  margin: 10px;
+  color:white;
+  padding:20px;
+  border-radius:50px;
+}
 .App {
   text-align: center;
 }
