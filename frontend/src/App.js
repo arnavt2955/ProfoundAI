@@ -92,8 +92,28 @@ function App() {
     setShowTextBox(!showTextBox);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmittedText(userThoughts);
+    const data = { message: userThoughts };
+    try {
+      const response = await fetch('/question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Response from server:', result.answer);
+      } else {
+        setMessage(`Error: ${result.error}`);
+      }
+      
+    } catch (error) {
+      console.error('Error sending string:', error);
+    }
     setUserThoughts(""); 
   };
 

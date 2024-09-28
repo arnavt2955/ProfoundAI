@@ -18,6 +18,7 @@ dbName = "profound_slides"
 collectionName = "collection_of_text_blobs"
 collection = client[dbName][collectionName]
 
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_KEY)
 llm = OpenAI(openai_api_key=OPENAI_KEY, temperature=0)
 app = Flask(__name__)
 
@@ -50,7 +51,7 @@ def upload_file():
     # Clear the collection before adding new documents
     collection.delete_many({})  
     documents = [Document(page_content=doc) for doc in page_text]
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_KEY)
+    
     vectorStore = MongoDBAtlasVectorSearch.from_documents(documents, embeddings, collection=collection)
     #vectorStore = MongoDBAtlasVectorSearch(collection, embeddings)
     retriever = vectorStore.as_retriever()
@@ -59,6 +60,16 @@ def upload_file():
     for pt in page_text:
         output.append(qa.run("Explain the content of the following parsed lecture slide like you are a professor, concisely in paragraph format. Leave out any citations or page numbers: " + pt))
     return jsonify({"full_text": full_text, "page_text": output}), 200
+
+@app.route('/question', methods=['POST'])
+def question():
+    data = request.get_json()
+    message = data.get('message')
+    vectorStore = MongoDBAtlasVectorSearch(collection, embeddings)
+    retriever = vectorStore.as_retriever()
+    qa = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=retriever)
+    out = qa.run(message)
+    return jsonify({"answer": out}), 200
 
 if __name__ == "__main__":
     print('hello')
