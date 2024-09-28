@@ -16,32 +16,16 @@ function App() {
   const [audioUrl, setAudioUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showTextBox, setShowTextBox] = useState(false);
-  const [canvasToken, setCanvasToken] = useState('');
-  const [canvasURL, setCanvasURL] = useState('');
   const audioRef = useRef(null);
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
   const audioSummaryPlayer= useRef(null);
-  
-  
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-  };
-
-  // PDF, canvasurl, canvas token upload handler
-  const handleSubmitUpload = async () => {
-    if (!file || !canvasURL || !canvasToken) {
-      setMessage('Please provide all the necessary inputs (file, Canvas URL, and Canvas Token).');
-      return;
-    }
-
+  // PDF upload handler
+  const uploadFile = async (e) => {
+    const uploadedFile = e.target.files[0];
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('canvasURL', canvasURL);
-    formData.append('canvasToken', canvasToken);
-    console.log(formData);
+    formData.append('file', uploadedFile);
+
     try {
       const response = await fetch('/upload', {
         method: 'POST',
@@ -51,10 +35,9 @@ function App() {
       const result = await response.json();
       
       if (response.ok) {
-        const fileURL = URL.createObjectURL(file);
+        const fileURL = URL.createObjectURL(uploadedFile);
         setFile(fileURL);
         setMessage(result.page_text);
-        console.log(result.page_text);
       } else {
         setMessage(`Error: ${result.error}`);
       }
@@ -62,9 +45,6 @@ function App() {
       console.error('Error uploading file:', error);
       setMessage('An error occurred while uploading the file.');
     }
-
-    setCanvasToken('');
-    setCanvasURL('');
   };
 
   const onDocumentLoadSuccess = ({ numPages }) => {
@@ -158,39 +138,15 @@ function App() {
         <input
           id="file-upload"
           type="file"
-          onChange={handleFileChange}
+          onChange={uploadFile}
           style={{ display: 'none' }}
           accept="application/pdf"
         />
-        <span className="text-gray-600 text-lg">Select PDF</span>
+        <span className="text-gray-600 text-lg">Upload PDF</span>
       </label>
-      
-      {/* Canvas API Input Section */}
-      <div className="mb-8">
-        <input
-          type="text"
-          value={canvasURL}
-          onChange={(e) => setCanvasURL(e.target.value)}
-          placeholder="Enter Canvas URL"
-          className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2"
-        />
-        <input
-          type="text"
-          value={canvasToken}
-          onChange={(e) => setCanvasToken(e.target.value)}
-          placeholder="Enter Canvas Token"
-          className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2"
-        />
-        <button
-          onClick={handleSubmitUpload}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
-        >
-          Submit
-        </button>
-      </div>
 
       {/* PDF Viewer */}
-      {(file && canvasURL && canvasToken)? (
+      {file ? (
         <div className="flex items-center justify-center w-full max-w-5xl bg-white p-8 rounded-xl shadow-lg relative">
           {/* Left Arrow */}
           <button
@@ -228,7 +184,7 @@ function App() {
 
 
       {/* Text-to-Speech Section */}
-      {(file && canvasURL && canvasToken)? (
+      {file ? (
         <div className="mt-10">
           <button
             onClick={handleTextToSpeech}
@@ -242,7 +198,7 @@ function App() {
       )}
 
       {/* Hand Raise Button */}
-      {file && canvasURL && canvasToken && audioUrl && !isLoading && (
+      {file && audioUrl && !isLoading && (
         <button
           onClick={handleHandRaise}
           className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
