@@ -6,10 +6,7 @@ import OpenAI from 'openai'
 import {Buffer} from 'buffer'
 //require('dotenv').config({ path: '.env.local' });
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 function App() {
   const [file, setFile] = useState(null);
@@ -23,6 +20,8 @@ function App() {
   const apiKey = process.env.REACT_APP_HUGGING_FACE_TOKEN;
   const openai = new OpenAI({apiKey:`${process.env.REACT_APP_OPENAI_KEY}`, dangerouslyAllowBrowser: true});
   //console.log(apiKey);
+  const [userThoughts, setUserThoughts] = useState(""); 
+  const [submittedText, setSubmittedText] = useState(""); 
 
   // PDF upload handler
   const uploadFile = async (e) => {
@@ -97,7 +96,7 @@ function App() {
   // Handle "hand raise" button click
   const handleHandRaise = () => {
     // Pause the audio if it's playing
-    if (audioRef.current) {
+    if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
     }
     // Toggle the visibility of the text input box
@@ -105,41 +104,38 @@ function App() {
   };
 
   // Fetch request for Text-to-Speech
-  async function query(data, url) {
-    
+  async function query(data) {
+    var response = await fetch("https://api-inference.huggingface.co/models/suno/bark", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
-    var response = await fetch(
-      "https://api-inference.huggingface.co/models/suno/bark",
-      {
+    if (!response.ok) {
+      response = await fetch("https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech", {
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         method: "POST",
         body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      response = await fetch(
-        "https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech",
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify(data),
-        }
-      );
+      });
     }
 
     return response;
   }
 
+  const handleSubmit = () => {
+    setSubmittedText(userThoughts);
+    setUserThoughts(""); 
+  };
+
   return (
     <div className="App min-h-screen bg-gray-100 flex flex-col items-center justify-center py-8">
-      <h1 className="text-4xl font-bold mb-8">Presently</h1>
+      <h1 className="text-4xl font-bold mb-8">Simon Says</h1>
 
       {/* PDF Upload Section */}
       <label className="cursor-pointer mb-4">
@@ -216,21 +212,22 @@ function App() {
 
       {/* Text Input Box */}
       {showTextBox && (
-        <div className="mt-4 flex items-center space-x-4">
-          <textarea
-            className="p-4 border rounded-lg h-40"
-            placeholder="Type your thoughts here..."
-            rows="6"
-          />
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Submit
-          </button>
-        </div>
+      <div className="mt-8 w-full max-w-md">
+      <input
+        type="text"
+        value={userThoughts}
+        onChange={(e) => setUserThoughts(e.target.value)}
+        placeholder="Type your thoughts..."
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        onClick={handleSubmit}
+        className="bg-blue-500 text-white px-4 py-2 rounded mt-2 w-full hover:bg-blue-600"
+      >
+        Submit
+      </button>
+    </div>
       )}
-
-
     </div>
   );
 }
