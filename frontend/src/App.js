@@ -232,7 +232,7 @@ function App() {
 
 
       {/* Text-to-Speech Section */}
-      {file ? (
+      {file ?  !isLoading && (
         <div className="mt-10">
           <button
             onClick={handleTextToSpeech}
