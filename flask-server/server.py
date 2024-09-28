@@ -1,6 +1,24 @@
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+import os
 import pdfplumber
+from pymongo import MongoClient
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import MongoDBAtlasVectorSearch
+from langchain.document_loaders import DirectoryLoader
+from langchain.schema import Document
+from langchain.llms import OpenAI
+from langchain.chains import RetrievalQA
 
+load_dotenv()
+OPENAI_KEY=os.getenv('OPENAI_KEY')
+MONGO_URI=os.getenv('MONGO_URI')
+client = MongoClient(MONGO_URI)
+dbName = "profound_slides"
+collectionName = "collection_of_text_blobs"
+collection = client[dbName][collectionName]
+
+llm = OpenAI(openai_api_key=OPENAI_KEY, temperature=0)
 app = Flask(__name__)
 
 @app.route("/test")
@@ -29,8 +47,18 @@ def upload_file():
                 text += f"Table: {table}\n"
             full_text += text + "\n"
             page_text.append(text)
-
-    return jsonify({"full_text": full_text, "page_text": page_text}), 200
+    # Clear the collection before adding new documents
+    collection.delete_many({})  
+    documents = [Document(page_content=doc) for doc in page_text]
+    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_KEY)
+    vectorStore = MongoDBAtlasVectorSearch.from_documents(documents, embeddings, collection=collection)
+    #vectorStore = MongoDBAtlasVectorSearch(collection, embeddings)
+    retriever = vectorStore.as_retriever()
+    qa = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=retriever)
+    output = []
+    for pt in page_text:
+        output.append(qa.run("Explain the following parsed lecture slide like you are a teacher, clearly and concisely in paragraph format. Leave out any citations or page numbers: " + pt))
+    return jsonify({"full_text": full_text, "page_text": output}), 200
 
 if __name__ == "__main__":
     print('hello')
