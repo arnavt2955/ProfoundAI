@@ -19,7 +19,7 @@ collectionName = "collection_of_text_blobs"
 collection = client[dbName][collectionName]
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_KEY)
-llm = OpenAI(openai_api_key=OPENAI_KEY, temperature=0)
+llm = OpenAI(openai_api_key=OPENAI_KEY, temperature=0.5)
 app = Flask(__name__)
 
 @app.route("/test")
@@ -58,7 +58,7 @@ def upload_file():
     qa = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=retriever)
     output = []
     for pt in page_text:
-        output.append(qa.run("Explain the content of the following parsed lecture slide like you are a professor, concisely in paragraph format. Leave out any citations or page numbers: " + pt))
+        output.append(qa.run("Present the following parsed lecture slide like you are a professor, concisely in paragraph format. Leave out any citations or page numbers. If the slide has little content, generate less: " + pt))
     return jsonify({"full_text": full_text, "page_text": output}), 200
 
 @app.route('/question', methods=['POST'])
