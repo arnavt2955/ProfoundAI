@@ -86,6 +86,7 @@ function App() {
     if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
       audioSummaryPlayer.current.pause();
     }
+    setIsLoading(true);
     const text = message[pageNumber - 1];
 
     const openaimessage = await getAudioBuffer(text);
@@ -96,6 +97,7 @@ function App() {
     audioSummaryPlayer.current = audioplayerlocal;
     audioSummaryPlayer.current.playbackRate = 1.25;
     audioSummaryPlayer.current.play();
+    setIsLoading(false);
   };
 
   async function getAudioBuffer(text) {
