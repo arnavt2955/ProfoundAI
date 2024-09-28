@@ -106,7 +106,11 @@ function App() {
   
       const result = await response.json();
       if (response.ok) {
-        console.log('Response from server:', result.answer);
+        const openaimessage = await getAudioBuffer(result.answer);
+        const blob = new Blob([openaimessage], { type: 'audio/mpeg' });
+        const audioUrlAnswer = URL.createObjectURL(blob);
+        const audioAnswerPlayer = new Audio(audioUrlAnswer);
+        audioAnswerPlayer.play();
       } else {
         setMessage(`Error: ${result.error}`);
       }
