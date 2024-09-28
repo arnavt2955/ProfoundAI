@@ -10,6 +10,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.m
 
 function App() {
   const [file, setFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(0);
   const [message, setMessage] = useState([]);
@@ -19,18 +20,26 @@ function App() {
   const audioRef = useRef(null);
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
+  const [canvasURL, setCanvasURL] = useState("");
+  const [canvasToken, setCanvasToken] = useState("");
   const audioSummaryPlayer= useRef(null);
   const [isChangingPageNum, setIsChangingPageNum] = useState(false);
 
 
   
 
+  const changeFile = async (e) => {
+    setSelectedFile(e.target.files[0]);
+  } 
   // PDF upload handler
-  const uploadFile = async (e) => {
-    const uploadedFile = e.target.files[0];
+  const uploadFile = async () => {
+    const uploadedFile = selectedFile;
     const formData = new FormData();
     formData.append('file', uploadedFile);
-
+    formData.append('canvasURL', canvasURL);
+    formData.append('canvasToken', canvasToken);
+    console.log(canvasURL);
+    console.log(canvasToken);
     try {
       const response = await fetch('/upload', {
         method: 'POST',
@@ -113,7 +122,7 @@ function App() {
     
     if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
       audioSummaryPlayer.current.pause();
-    } else if (audioSummaryPlayer.current && audioSummaryPlayer.current.paused) {
+    } else if (audioSummaryPlayer.current && audioSummaryPlayer.current.paused && !audioSummaryPlayer.current.ended) {
       audioSummaryPlayer.current.play();
     }
     
@@ -155,17 +164,34 @@ function App() {
       <h1 className="text-5xl font-semibold mb-8 text-gray-700">Profound AI</h1>
 
       {/* PDF Upload Section */}
-      <label className="cursor-pointer mb-6 flex flex-col items-center">
-        <img src={icon} alt="Upload File" className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300" />
+      <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file ? {display: 'block'} : {display: 'none'}}>
+        <img src={icon} alt="Upload File" style={{margin: "0 auto"}}className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300" />
         <input
           id="file-upload"
           type="file"
-          onChange={uploadFile}
+          onChange={changeFile}
           style={{ display: 'none' }}
           accept="application/pdf"
         />
-        <span className="text-gray-600 text-lg">Upload PDF</span>
+        <span className="text-gray-600 text-lg">{selectedFile ? selectedFile.name : "No file selected..."}</span>
       </label>
+      <div className="mb-6 flex flex-col items-center w-full max-w-md" style={!file ? {display: 'block'} : {display: 'none'}}>
+        <input
+          type="text"
+          value={canvasURL}
+          onChange={(e) => setCanvasURL(e.target.value)}
+          placeholder="Enter Canvas URL"
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <input
+          type="text"
+          value={canvasToken}
+          onChange={(e) => setCanvasToken(e.target.value)}
+          placeholder="Enter Canvas Token"
+          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+      <button onClick={uploadFile} style={!file ? {display: 'block'} : {display: 'none'}} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" >Submit</button>
 
       {/* PDF Viewer */}
       {file ? (

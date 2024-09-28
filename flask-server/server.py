@@ -32,6 +32,8 @@ def upload_file():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files['file']
+    canvasURL = request.form.get('canvasURL')
+    canvasToken = request.form.get('canvasToken')
 
     #file.save(f'./uploads/{file.filename}')
     
