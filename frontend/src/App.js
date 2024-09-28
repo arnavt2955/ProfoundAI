@@ -4,6 +4,7 @@ import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
 import OpenAI from 'openai'
 import {Buffer} from 'buffer'
+import axios from 'axios';
 //require('dotenv').config({ path: '.env.local' });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
@@ -22,6 +23,7 @@ function App() {
   //console.log(apiKey);
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
+
 
   // PDF upload handler
   const uploadFile = async (e) => {
@@ -63,14 +65,9 @@ function App() {
     setIsLoading(true);
     const text = message[pageNumber-1];
 
-    const openaimessage = openai.audio.speech.create({
-      model: 'tts-1-hd',
-      voice: 'alloy',
-      input: text,
-    });
-
-    const buffer = Buffer.from(await openaimessage.arrayBuffer());
-    const blob = new Blob([buffer], {type:'audio/mpeg'});
+    const openaimessage = await getAudioBuffer(text);
+    console.log(text);
+    const blob = new Blob([openaimessage], {type:'audio/mpeg'});
     const audioURL2 = URL.createObjectURL(blob);
     setAudioUrl(audioURL2);
     setIsLoading(false);
@@ -102,6 +99,23 @@ function App() {
     // Toggle the visibility of the text input box
     setShowTextBox(!showTextBox);
   };
+
+
+  async function getAudioBuffer(text) {
+    const response = await axios.post('https://api.openai.com/v1/audio/speech', {
+      model: 'tts-1-hd',
+      voice: 'alloy',
+      input: text
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_KEY}`
+      },
+      responseType: 'arraybuffer' // Specify arraybuffer as the response type
+    });
+  
+    return Buffer.from(response.data);
+  }
 
   // Fetch request for Text-to-Speech
   async function query(data) {
