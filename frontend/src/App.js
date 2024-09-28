@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // Minimal usage for Tailwind only
 import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
@@ -11,7 +11,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.m
 function App() {
   const [file, setFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(0);
   const [message, setMessage] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +20,11 @@ function App() {
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
   const audioSummaryPlayer= useRef(null);
+  const [isChangingPageNum, setIsChangingPageNum] = useState(false);
+
+
+  
+
   // PDF upload handler
   const uploadFile = async (e) => {
     const uploadedFile = e.target.files[0];
@@ -52,11 +57,22 @@ function App() {
     setPageNumber(1);
   };
 
-  const goToPrevPage = () => setPageNumber(prev => Math.max(prev - 1, 1));
-  const goToNextPage = () => setPageNumber(prev => Math.min(prev + 1, numPages));
+  const goToPrevPage = () => {
+    setIsChangingPageNum(true);
+    setPageNumber(prev => Math.max(prev - 1, 1));
+    setIsChangingPageNum(false);
+  }
+  const goToNextPage = () => {
+    setIsChangingPageNum(true);
+    setPageNumber(prev => Math.min(prev + 1, numPages));
+    setIsChangingPageNum(false);
+  }
 
   // Text-to-Speech handler
   const handleTextToSpeech = async () => {
+    if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
+      audioSummaryPlayer.current.pause();
+    }
     setIsLoading(true);
     const text = message[pageNumber - 1];
 
@@ -86,6 +102,12 @@ function App() {
   
     return Buffer.from(response.data);
   }
+
+  useEffect(() => {
+    if (message.length !== 0 && pageNumber > 0) {
+      handleTextToSpeech();
+    }
+  }, [pageNumber]);
 
   const handleHandRaise = () => {
     
@@ -190,7 +212,7 @@ function App() {
             onClick={handleTextToSpeech}
             className="bg-teal-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-teal-600 transition duration-300 ease-in-out"
           >
-            Speak
+            Play
           </button>
         </div>
       ) : (
@@ -198,12 +220,21 @@ function App() {
       )}
 
       {/* Hand Raise Button */}
-      {file && audioUrl && !isLoading && (
+      {file && audioUrl && !isLoading && !showTextBox && (
         <button
           onClick={handleHandRaise}
           className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
         >
           ✋
+        </button>
+      )}
+
+      {file && audioUrl && !isLoading && showTextBox &&(
+        <button
+          onClick={handleHandRaise}
+          className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
+        >
+          Resume
         </button>
       )}
 
