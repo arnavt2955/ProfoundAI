@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import './App.css'; // Minimal usage for Tailwind only
 import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
+import OpenAI from 'openai'
+import {Buffer} from 'buffer'
 //require('dotenv').config({ path: '.env.local' });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -13,11 +15,13 @@ function App() {
   const [file, setFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [message, setMessage] = useState("No file uploaded");
+  const [message, setMessage] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [showTextBox, setShowTextBox] = useState(false);
   const audioRef = useRef(null);
   const apiKey = process.env.REACT_APP_HUGGING_FACE_TOKEN;
+  const openai = new OpenAI({apiKey:`${process.env.REACT_APP_OPENAI_KEY}`, dangerouslyAllowBrowser: true});
   //console.log(apiKey);
 
   // PDF upload handler
@@ -37,7 +41,7 @@ function App() {
       if (response.ok) {
         const fileURL = URL.createObjectURL(uploadedFile);
         setFile(fileURL);
-        setMessage(result.full_text);
+        setMessage(result.page_text);
       } else {
         setMessage(`Error: ${result.error}`);
       }
@@ -57,21 +61,37 @@ function App() {
 
   // Text-to-Speech handler
   const handleTextToSpeech = async () => {
-    const text = "Hello, this is our text to speech application with bobby who is kinky";
+    setIsLoading(true);
+    const text = message[pageNumber-1];
 
+    const openaimessage = openai.audio.speech.create({
+      model: 'tts-1-hd',
+      voice: 'alloy',
+      input: text,
+    });
+
+    const buffer = Buffer.from(await openaimessage.arrayBuffer());
+    const blob = new Blob([buffer], {type:'audio/mpeg'});
+    const audioURL2 = URL.createObjectURL(blob);
+    setAudioUrl(audioURL2);
+    setIsLoading(false);
+/**
     try {
       const response = await query({ inputs: text });
 
       if (response.ok) {
         const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setAudioUrl(audioUrl);
+        const audioUrl1 = URL.createObjectURL(audioBlob);
+        
+        setAudioUrl(audioUrl1);
+        setIsLoading(false);
+        
       } else {
         console.error("Error with the Hugging Face API", response.statusText);
       }
     } catch (error) {
       console.error("Error in processing the API request:", error);
-    }
+    }*/
   };
 
   // Handle "hand raise" button click
@@ -161,10 +181,10 @@ function App() {
               Next Page
             </button>
           </div>
-          <h4 className="mt-4 text-center">{message}</h4>
+          <h4 className="mt-4 text-center">{message[pageNumber - 1]}</h4>
         </div>
       ) : (
-        <div className="text-center text-gray-600">{message}</div>
+        <div className="text-center text-gray-600">{message[pageNumber - 1]}</div>
       )}
 
       {/* Text-to-Speech Section */}
@@ -175,13 +195,14 @@ function App() {
         >
           Speak
         </button>
-        {audioUrl && (
+        {audioUrl && !isLoading && (
           <audio controls className="mt-4 w-full max-w-md" ref={audioRef}>
             <source src={audioUrl} type="audio/wav" />
             Your browser does not support the audio element.
           </audio>
         )}
       </div>
+      
 
       {/* Hand Raise Button */}
       {file && (
