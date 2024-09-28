@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
+//require('dotenv').config({ path: '.env.local' });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -14,6 +15,8 @@ function App() {
   const [pageNumber, setPageNumber] = useState(1);
   const [message, setMessage] = useState("No file uploaded");
   const [audioUrl, setAudioUrl] = useState(null); // State for Text-to-Speech
+  const apiKey = process.env.REACT_APP_HUGGING_FACE_TOKEN;
+  //console.log(apiKey);
 
   // PDF upload handler
   const uploadFile = async (e) => {
@@ -52,7 +55,7 @@ function App() {
 
   // Text-to-Speech handler
   const handleTextToSpeech = async () => {
-    const text = "Hello, this is our text to speech application with bobby who is kinky";
+    const text = "Hello, this is our text to speech application with bobby who";
 
     try {
       const response = await query({ inputs: text });
@@ -70,12 +73,14 @@ function App() {
   };
 
   // Fetch request for Text-to-Speech
-  async function query(data) {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech",
+  async function query(data, url) {
+    
+
+    var response = await fetch(
+      "https://api-inference.huggingface.co/models/suno/bark",
       {
         headers: {
-          Authorization: "Bearer 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",
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         method: "POST",
@@ -83,8 +88,23 @@ function App() {
       }
     );
 
+    if (!response.ok) {
+      response = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech",
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      );
+    }
+
     return response;
   }
+
 
   return (
     <div className="App min-h-screen bg-gray-100 flex flex-col items-center justify-center py-8">
