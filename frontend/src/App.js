@@ -4,6 +4,7 @@ import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
 import { Buffer } from 'buffer';
 import axios from 'axios';
+import logo from "./img/ProFound-ai.png"
 //require('dotenv').config({ path: '.env.local' });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
@@ -161,7 +162,7 @@ function App() {
 
   return (
     <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
-      <h1 className="text-5xl font-semibold mb-8 text-gray-700">Profound AI</h1>
+      <img src={logo} alt="Upload File" style={{margin: "0 auto"}}className="w-20 h-20 mb-2 opacity-100 hover:opacity-100 transition-opacity duration-300" />
 
       {/* PDF Upload Section */}
       <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file ? {display: 'block'} : {display: 'none'}}>
