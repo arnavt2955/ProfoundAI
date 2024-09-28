@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // Minimal usage for Tailwind only
 import icon from "./img/uploadicon.png";
+import loadingGif from "./img/loading.gif"; // Import the uploaded GIF
 import { pdfjs, Document, Page } from 'react-pdf';
 import { Buffer } from 'buffer';
 import axios from 'axios';
-//require('dotenv').config({ path: '.env.local' });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
@@ -16,21 +16,20 @@ function App() {
   const [message, setMessage] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [showTextBox, setShowTextBox] = useState(false);
   const audioRef = useRef(null);
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
   const [canvasURL, setCanvasURL] = useState("");
   const [canvasToken, setCanvasToken] = useState("");
-  const audioSummaryPlayer= useRef(null);
+  const audioSummaryPlayer = useRef(null);
   const [isChangingPageNum, setIsChangingPageNum] = useState(false);
-
-
-  
 
   const changeFile = async (e) => {
     setSelectedFile(e.target.files[0]);
-  } 
+  };
+
   // PDF upload handler
   const uploadFile = async () => {
     const uploadedFile = selectedFile;
@@ -38,8 +37,8 @@ function App() {
     formData.append('file', uploadedFile);
     formData.append('canvasURL', canvasURL);
     formData.append('canvasToken', canvasToken);
-    console.log(canvasURL);
-    console.log(canvasToken);
+
+    setIsUploading(true); // Set loading to true when starting the initial upload
     try {
       const response = await fetch('/upload', {
         method: 'POST',
@@ -58,6 +57,8 @@ function App() {
     } catch (error) {
       console.error('Error uploading file:', error);
       setMessage('An error occurred while uploading the file.');
+    } finally {
+      setIsUploading(false); // Set loading to false when the upload completes
     }
   };
 
@@ -70,30 +71,29 @@ function App() {
     setIsChangingPageNum(true);
     setPageNumber(prev => Math.max(prev - 1, 1));
     setIsChangingPageNum(false);
-  }
+  };
+
   const goToNextPage = () => {
     setIsChangingPageNum(true);
     setPageNumber(prev => Math.min(prev + 1, numPages));
     setIsChangingPageNum(false);
-  }
+  };
 
   // Text-to-Speech handler
   const handleTextToSpeech = async () => {
     if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
       audioSummaryPlayer.current.pause();
     }
-    setIsLoading(true);
     const text = message[pageNumber - 1];
 
     const openaimessage = await getAudioBuffer(text);
     const blob = new Blob([openaimessage], { type: 'audio/mpeg' });
     const audioURL2 = URL.createObjectURL(blob);
-    setAudioUrl(audioURL2)
-    const audioplayerlocal = new Audio(audioURL2)
+    setAudioUrl(audioURL2);
+    const audioplayerlocal = new Audio(audioURL2);
     audioSummaryPlayer.current = audioplayerlocal;
     audioSummaryPlayer.current.playbackRate = 1.25;
-    audioSummaryPlayer.current.play()
-    setIsLoading(false);
+    audioSummaryPlayer.current.play();
   };
 
   async function getAudioBuffer(text) {
@@ -119,13 +119,11 @@ function App() {
   }, [pageNumber]);
 
   const handleHandRaise = () => {
-    
     if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
       audioSummaryPlayer.current.pause();
     } else if (audioSummaryPlayer.current && audioSummaryPlayer.current.paused && !audioSummaryPlayer.current.ended) {
       audioSummaryPlayer.current.play();
     }
-    
     
     setShowTextBox(!showTextBox);
   };
@@ -160,12 +158,15 @@ function App() {
   };
 
   return (
-    <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
+    <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8 relative">
+      {/* Loading GIF */}
+
+
       <h1 className="text-5xl font-semibold mb-8 text-gray-700">Profound AI</h1>
 
       {/* PDF Upload Section */}
-      <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file ? {display: 'block'} : {display: 'none'}}>
-        <img src={icon} alt="Upload File" style={{margin: "0 auto"}}className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300" />
+      <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
+        <img src={icon} alt="Upload File" style={{ margin: "0 auto" }} className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300" />
         <input
           id="file-upload"
           type="file"
@@ -175,7 +176,7 @@ function App() {
         />
         <span className="text-gray-600 text-lg">{selectedFile ? selectedFile.name : "No file selected..."}</span>
       </label>
-      <div className="mb-6 flex flex-col items-center w-full max-w-md" style={!file ? {display: 'block'} : {display: 'none'}}>
+      <div className="mb-6 flex flex-col items-center w-full max-w-md" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
         <input
           type="text"
           value={canvasURL}
@@ -191,10 +192,17 @@ function App() {
           className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
-      <button onClick={uploadFile} style={!file ? {display: 'block'} : {display: 'none'}} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" >Submit</button>
+      <button onClick={uploadFile} style={!file && !isUploading? { display: 'block' } : { display: 'none' }} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Submit
+      </button>
+      {isUploading && (
+        <div>
+          <img src={loadingGif} alt="Loading..." className="w-40 h-40" /> {/* Use the GIF as an image */}
+        </div>
+      )}
 
       {/* PDF Viewer */}
-      {file ? (
+      {file && (
         <div className="flex items-center justify-center w-full max-w-5xl bg-white p-8 rounded-xl shadow-lg relative">
           {/* Left Arrow */}
           <button
@@ -226,10 +234,7 @@ function App() {
             &rarr;
           </button>
         </div>
-      ) : (
-        <div></div>
       )}
-
 
       {/* Text-to-Speech Section */}
       {file ? (
@@ -255,7 +260,7 @@ function App() {
         </button>
       )}
 
-      {file && audioUrl && !isLoading && showTextBox &&(
+      {file && audioUrl && !isLoading && showTextBox && (
         <button
           onClick={handleHandRaise}
           className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"

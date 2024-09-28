@@ -9,11 +9,16 @@ from langchain.document_loaders import DirectoryLoader
 from langchain.schema import Document
 from langchain.llms import OpenAI
 from langchain.chains import RetrievalQA
+import certifi
+from pymongo import MongoClient
 
 load_dotenv()
 OPENAI_KEY=os.getenv('OPENAI_KEY')
 MONGO_URI=os.getenv('MONGO_URI')
-client = MongoClient(MONGO_URI)
+client = MongoClient(
+    MONGO_URI,
+    tlsCAFile=certifi.where()
+)
 dbName = "profound_slides"
 collectionName = "collection_of_text_blobs"
 collection = client[dbName][collectionName]
