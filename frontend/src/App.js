@@ -22,7 +22,6 @@ function App() {
   const openai = new OpenAI({ apiKey: `${process.env.REACT_APP_OPENAI_KEY}`, dangerouslyAllowBrowser: true });
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
-
   // PDF upload handler
   const uploadFile = async (e) => {
     const uploadedFile = e.target.files[0];
@@ -64,7 +63,6 @@ function App() {
     const text = message[pageNumber - 1];
 
     const openaimessage = await getAudioBuffer(text);
-    console.log(text);
     const blob = new Blob([openaimessage], { type: 'audio/mpeg' });
     const audioURL2 = URL.createObjectURL(blob);
     setAudioUrl(audioURL2);
