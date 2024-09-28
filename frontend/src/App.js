@@ -74,6 +74,16 @@ function App() {
     }
   };
 
+  // Handle "hand raise" button click
+  const handleHandRaise = () => {
+    // Pause the audio if it's playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    // Toggle the visibility of the text input box
+    setShowTextBox(!showTextBox);
+  };
+
   // Fetch request for Text-to-Speech
   async function query(data, url) {
     
