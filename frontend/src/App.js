@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import './App.css'; // Minimal usage for Tailwind only
 import icon from "./img/uploadicon.png";
 import { pdfjs, Document, Page } from 'react-pdf';
-import OpenAI from 'openai';
 import { Buffer } from 'buffer';
 import axios from 'axios';
 //require('dotenv').config({ path: '.env.local' });
@@ -18,10 +17,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [showTextBox, setShowTextBox] = useState(false);
   const audioRef = useRef(null);
-  const apiKey = process.env.REACT_APP_HUGGING_FACE_TOKEN;
-  const openai = new OpenAI({ apiKey: `${process.env.REACT_APP_OPENAI_KEY}`, dangerouslyAllowBrowser: true });
   const [userThoughts, setUserThoughts] = useState(""); 
   const [submittedText, setSubmittedText] = useState(""); 
+  const audioSummaryPlayer= useRef(null);
   // PDF upload handler
   const uploadFile = async (e) => {
     const uploadedFile = e.target.files[0];
@@ -65,7 +63,11 @@ function App() {
     const openaimessage = await getAudioBuffer(text);
     const blob = new Blob([openaimessage], { type: 'audio/mpeg' });
     const audioURL2 = URL.createObjectURL(blob);
-    setAudioUrl(audioURL2);
+    setAudioUrl(audioURL2)
+    const audioplayerlocal = new Audio(audioURL2)
+    audioSummaryPlayer.current = audioplayerlocal;
+    audioSummaryPlayer.current.playbackRate = 1.25;
+    audioSummaryPlayer.current.play()
     setIsLoading(false);
   };
 
@@ -86,9 +88,14 @@ function App() {
   }
 
   const handleHandRaise = () => {
-    if (audioRef.current && !audioRef.current.paused) {
-      audioRef.current.pause();
+    
+    if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
+      audioSummaryPlayer.current.pause();
+    } else if (audioSummaryPlayer.current && audioSummaryPlayer.current.paused) {
+      audioSummaryPlayer.current.play();
     }
+    
+    
     setShowTextBox(!showTextBox);
   };
 
@@ -185,19 +192,13 @@ function App() {
           >
             Speak
           </button>
-          {audioUrl && !isLoading && (
-            <audio controls className="mt-6 w-full max-w-md" ref={audioRef}>
-              <source src={audioUrl} type="audio/wav" />
-              Your browser does not support the audio element.
-            </audio>
-          )}
         </div>
       ) : (
         <div></div>
       )}
 
       {/* Hand Raise Button */}
-      {file && audioUrl && (
+      {file && audioUrl && !isLoading && (
         <button
           onClick={handleHandRaise}
           className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
