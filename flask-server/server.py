@@ -63,25 +63,26 @@ def upload_file():
 
     canvasFiles = retrieveCanvasFiles(canvasURL, canvasToken)
 
-    pdf_Files = [file for file in canvasFiles if file.display_name.lower().endswith('.pdf')]
-    # for canvasfile in pdf_Files:
-    #     print(type(canvasfile), "-----------", canvasfile)
-    pdf_Downloads = download_files_to_memory(pdf_Files, canvasToken)
-    pdf_Pagetext = []
-    for eachPage, eachBuffer in pdf_Downloads:
-        pdf_Pagetext = extract_text_from_pdf_buffer(eachPage, eachBuffer)
-        pdf_Pagetext = [Document(page_content=doc) for doc in pdf_Pagetext]
-        documents = documents + pdf_Pagetext
+    if (len(canvasFiles) > 0):
+        pdf_Files = [file for file in canvasFiles if file.display_name.lower().endswith('.pdf')]
+        # for canvasfile in pdf_Files:
+        #     print(type(canvasfile), "-----------", canvasfile)
+        pdf_Downloads = download_files_to_memory(pdf_Files, canvasToken)
+        pdf_Pagetext = []
+        for eachPage, eachBuffer in pdf_Downloads:
+            pdf_Pagetext = extract_text_from_pdf_buffer(eachPage, eachBuffer)
+            pdf_Pagetext = [Document(page_content=doc) for doc in pdf_Pagetext]
+            documents = documents + pdf_Pagetext
 
-    pptx_Files = [file for file in canvasFiles if file.display_name.lower().endswith('.pptx')]
-    # for canvasfile in pptx_Files:
-    #     print(type(canvasfile), "-----------", canvasfile)
-    pptx_Downloads = download_files_to_memory(pptx_Files, canvasToken)
-    pptx_Pagetext = []
-    for eachPage, eachBuffer in pptx_Downloads:
-        pptx_Pagetext = extract_text_from_pptx_buffer(eachPage, eachBuffer)
-        pptx_Pagetext = [Document(page_content=doc) for doc in pptx_Pagetext]
-        documents = documents + pptx_Pagetext
+        pptx_Files = [file for file in canvasFiles if file.display_name.lower().endswith('.pptx')]
+        # for canvasfile in pptx_Files:
+        #     print(type(canvasfile), "-----------", canvasfile)
+        pptx_Downloads = download_files_to_memory(pptx_Files, canvasToken)
+        pptx_Pagetext = []
+        for eachPage, eachBuffer in pptx_Downloads:
+            pptx_Pagetext = extract_text_from_pptx_buffer(eachPage, eachBuffer)
+            pptx_Pagetext = [Document(page_content=doc) for doc in pptx_Pagetext]
+            documents = documents + pptx_Pagetext
 
     vectorStore = MongoDBAtlasVectorSearch.from_documents(documents, embeddings, collection=collection)
     #vectorStore = MongoDBAtlasVectorSearch(collection, embeddings)
@@ -95,11 +96,20 @@ def upload_file():
 # retreives all pdfs and powerpoints (pptx files)
 def retrieveCanvasFiles(canvasURL, canvasAuthToken):
 
-    if canvasURL == "" or canvasAuthToken == "":
+    if "/courses/" not in canvasURL or canvasAuthToken == "":
         return []
     
-    baseURL = 'https://gatech.instructure.com'
+    url_parts = canvasURL.split("/courses/", 1)
+    baseURL = url_parts[0]
 
+    courseURL = url_parts[1]
+    
+    if "/" in courseURL:
+        courseIdArr = courseURL.split("/", 1)
+        courseId = int(courseIdArr[0])
+    else:
+        courseId = int(courseURL)
+        
     
     try:
         canvas = Canvas(baseURL, canvasAuthToken)
@@ -114,7 +124,7 @@ def retrieveCanvasFiles(canvasURL, canvasAuthToken):
     
     try:
         # Attempt to retrieve the course
-        courseId = 374332
+        # courseId = 374332
         canvas = canvas.get_course(courseId)
         
         # If successful, print canvas details
