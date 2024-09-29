@@ -176,7 +176,7 @@ function App() {
   };
 
   return (
-    <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
+    <div className="App min-h-screen bg-gradient-to-b from-blue-300 to-white-300 flex flex-col items-center justify-center py-8">
       <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo" onClick={() => window.location.reload()}/>
 
       {/* PDF Upload Section */}
@@ -184,7 +184,7 @@ function App() {
         <div className="uploadimagewrapper">
           <img src={icon} alt="Upload File" style={{ margin: "0 auto" }} className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300 uploadimage" />
         </div>
-        <input
+        <inputcyan
           id="file-upload"
           type="file"
           onChange={changeFile}
@@ -193,21 +193,26 @@ function App() {
         />
         <span className="text-gray-600 text-lg flex items-center justify-center"> {selectedFile ? selectedFile.name : "No file selected"}</span>
       </label>
-      <div className="mb-6 flex flex-col items-center w-full max-w-md optionalbox" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
-        <input
-          type="text"
-          value={canvasURL}
-          onChange={(e) => setCanvasURL(e.target.value)}
-          placeholder="Enter Canvas URL"
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <input
-          type="text"
-          value={canvasToken}
-          onChange={(e) => setCanvasToken(e.target.value)}
-          placeholder="Enter Canvas Token"
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+      <div className="mb-6 w-full max-w-md" style={!file && !isUploading ? { display: 'block' } : { display: 'none' }}>
+        <div className="rounded-lg p-4 shadow-md bg-white canvasbox">
+          <h3 className="text-lg font-semibold mb-4 text-center">Canvas Info (Optional)</h3>
+          <div className="flex flex-col items-center">
+            <input
+              type="text"
+              value={canvasURL}
+              onChange={(e) => setCanvasURL(e.target.value)}
+              placeholder="Enter Canvas URL"
+              className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              value={canvasToken}
+              onChange={(e) => setCanvasToken(e.target.value)}
+              placeholder="Enter Canvas Token"
+              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </div>
       </div>
       <button onClick={uploadFile} style={!file && !isUploading? { display: 'block' } : { display: 'none' }} className="submitbutton text-white font-bold py-2 px-4 rounded">
         Submit
