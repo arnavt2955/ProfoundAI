@@ -5,7 +5,7 @@
 Tech Stack: ReactJS, TailwindCSS, Flask, MongoDB Atlas, Langchain
 
 ## Set up for yourself:
-Required Python Installations: pip install langchain pymongo bs4 openai tiktoken gradio requests lxml argparse unstructured flask pdfplumber python-dotenv
+Required Python Installations: pip install langchain pymongo bs4 openai tiktoken gradio requests lxml argparse unstructured flask pdfplumber python-dotenv requests
 
 We also have two .env files. One for the backend and one for the frontend
 
