@@ -175,7 +175,7 @@ function App() {
 
   return (
     <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
-      <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo" onclick={() => window.location.reload()}/>
+      <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo" onClick={() => window.location.reload()}/>
 
       {/* PDF Upload Section */}
       <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
