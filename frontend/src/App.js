@@ -27,6 +27,7 @@ function App() {
   const [canvasToken, setCanvasToken] = useState("");
   const audioSummaryPlayer = useRef(null);
   const [isChangingPageNum, setIsChangingPageNum] = useState(false);
+  const [audioURLARRAY, setAudioURLARRAY] = useState([]);
 
   const changeFile = async (e) => {
     setSelectedFile(e.target.files[0]);
@@ -39,6 +40,7 @@ function App() {
     formData.append('file', uploadedFile);
     formData.append('canvasURL', canvasURL);
     formData.append('canvasToken', canvasToken);
+    let audioURLArray = [];
 
     setIsUploading(true); // Set loading to true when starting the initial upload
     try {
@@ -51,7 +53,15 @@ function App() {
       
       if (response.ok) {
         const fileURL = URL.createObjectURL(uploadedFile);
+        for (var i = 0; i < result.page_text.length; i++) {
+          const openaimessage = await getAudioBuffer(result.page_text[i]);
+          const blob = new Blob([openaimessage], {type:'audio/mpeg'});
+          const audioURLs = URL.createObjectURL(blob);
+          audioURLArray.push(audioURLs);
+        }
         setFile(fileURL);
+        
+        setAudioURLARRAY(audioURLArray);
         setMessage(result.page_text);
       } else {
         setMessage(`Error: ${result.error}`);
@@ -89,15 +99,17 @@ function App() {
     setIsLoading(true);
     const text = message[pageNumber - 1];
 
-    const openaimessage = await getAudioBuffer(text);
-    const blob = new Blob([openaimessage], { type: 'audio/mpeg' });
-    const audioURL2 = URL.createObjectURL(blob);
-    setAudioUrl(audioURL2);
-    const audioplayerlocal = new Audio(audioURL2);
-    audioSummaryPlayer.current = audioplayerlocal;
-    audioSummaryPlayer.current.playbackRate = 1.25;
-    audioSummaryPlayer.current.play();
-    setIsLoading(false);
+    setAudioUrl(null);
+    setTimeout(() => {
+      setAudioUrl(audioURLARRAY[pageNumber - 1]);
+      
+      const audioplayerlocal = new Audio(audioURLARRAY[pageNumber - 1]);
+      audioSummaryPlayer.current = audioplayerlocal;
+      audioSummaryPlayer.current.playbackRate = 1.25;
+      audioSummaryPlayer.current.play();
+      setIsLoading(false);
+    }, 0);
+    
   };
 
   async function getAudioBuffer(text) {
