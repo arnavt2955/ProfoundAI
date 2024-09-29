@@ -6,6 +6,24 @@
   transform: translateX(100%);
 }
 
+
+.uploadimagewrapper{
+  padding: 20px 40px;
+  border: 5px dashed rgb(47, 80, 142);
+  border-radius: 15px;
+  background-color:rgba(47, 80, 142, 0.295);
+  margin-bottom: 5px;
+}
+.submitbutton{
+  background-color:rgb(50, 86, 153) ;
+}
+.logo {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 150px;
+}
+
 .slide-enter-active {
   opacity: 1;
   transform: translateX(0);

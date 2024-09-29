@@ -163,11 +163,13 @@ function App() {
 
   return (
     <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
-      <img src={logo} alt="Upload File" style={{margin: "0 auto"}}className="w-20 h-20 mb-2 opacity-100 hover:opacity-100 transition-opacity duration-300" />
+      <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo"/>
 
       {/* PDF Upload Section */}
       <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
-        <img src={icon} alt="Upload File" style={{ margin: "0 auto" }} className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300" />
+        <div className="uploadimagewrapper">
+          <img src={icon} alt="Upload File" style={{ margin: "0 auto" }} className="w-20 h-20 mb-2 opacity-80 hover:opacity-100 transition-opacity duration-300 uploadimage" />
+        </div>
         <input
           id="file-upload"
           type="file"
@@ -177,7 +179,7 @@ function App() {
         />
         <span className="text-gray-600 text-lg">{selectedFile ? selectedFile.name : "No file selected..."}</span>
       </label>
-      <div className="mb-6 flex flex-col items-center w-full max-w-md" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
+      <div className="mb-6 flex flex-col items-center w-full max-w-md optionalbox" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
         <input
           type="text"
           value={canvasURL}
@@ -193,7 +195,7 @@ function App() {
           className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
-      <button onClick={uploadFile} style={!file && !isUploading? { display: 'block' } : { display: 'none' }} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      <button onClick={uploadFile} style={!file && !isUploading? { display: 'block' } : { display: 'none' }} className="submitbutton text-white font-bold py-2 px-4 rounded">
         Submit
       </button>
       {isUploading && (
@@ -244,7 +246,7 @@ function App() {
             onClick={handleTextToSpeech}
             className="bg-teal-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-teal-600 transition duration-300 ease-in-out"
           >
-            Play
+            Replay
           </button>
         </div>
       ) : (
