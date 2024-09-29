@@ -219,7 +219,9 @@ function App() {
       </button>
       {isUploading && (
         <div>
-          <img src={loadingGif} alt="Loading..." className="w-40 h-40" /> {/* Use the GIF as an image */}
+          <h4>It takes you 15 minutes to walk to class, you can wait 5 😉</h4>
+          <img style={{margin:"0 auto"}} src={loadingGif} alt="Loading..." className="w-40 h-40" /> {/* Use the GIF as an image */}
+          
         </div>
       )}
 
