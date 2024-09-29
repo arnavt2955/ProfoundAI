@@ -89,8 +89,18 @@ def upload_file():
     retriever = vectorStore.as_retriever()
     qa = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=retriever)
     output = []
+    count = 1
     for pt in page_text:
-        output.append(qa.run("Present the following parsed lecture slide like you are a professor, concisely in paragraph format. Leave out any citations or page numbers. If the slide has little content, generate less: " + pt))
+        prompt = ""
+        if count == 1:
+            prompt = "You are a lecturer at the beginning of a presentation. Present this parsed lecture intro slide concisely: " + pt
+        elif count == len(page_text):
+            prompt = "You are a lecturer at the end of a presentation. Present the parsed lecture slide concisely and add a presentation conclusion and thank the user for listening: "+  pt
+        else:
+            prompt = "You are a lecturer in the middle of a presentation. Present the parsed lecture slide concisely: "+  pt
+        output.append(qa.run(prompt))
+        count += 1
+
     return jsonify({"full_text": full_text, "page_text": output}), 200
 
 # retreives all pdfs and powerpoints (pptx files)
