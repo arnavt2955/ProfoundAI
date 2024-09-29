@@ -9,13 +9,13 @@
 
 .uploadimagewrapper{
   padding: 20px 40px;
-  border: 5px dashed rgb(68, 119, 215);
+  border: 5px dashed #0673C6;
   border-radius: 15px;
-  background-color:rgba(68, 119, 215, 0.468);
+  background-color:#0673c67d;
   margin-bottom: 5px;
 }
 .submitbutton{
-  background-color:rgb(68, 119, 215) ;
+  background-color:#0673C6 ;
 }
 .logo {
   position: fixed;
