@@ -191,7 +191,7 @@ function App() {
           style={{ display: 'none' }}
           accept="application/pdf"
         />
-        <span className="text-gray-600 text-lg">{selectedFile ? selectedFile.name : "No file selected..."}</span>
+        <span className="text-gray-600 text-lg flex items-center justify-center"> {selectedFile ? selectedFile.name : "No file selected"}</span>
       </label>
       <div className="mb-6 flex flex-col items-center w-full max-w-md optionalbox" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
         <input
