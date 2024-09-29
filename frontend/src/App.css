@@ -6,7 +6,10 @@
   transform: translateX(100%);
 }
 
-
+.videobutton{
+  font-size:17px;
+  margin:10px;
+}
 .uploadimagewrapper{
   padding: 20px 40px;
   border: 5px dashed #0673C6;

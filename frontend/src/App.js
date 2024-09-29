@@ -175,7 +175,7 @@ function App() {
 
   return (
     <div className="App min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 flex flex-col items-center justify-center py-8">
-      <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo"/>
+      <img src={logo} alt="Logo" style={{margin: "0 auto"}} className="logo" onclick={() => window.location.reload()}/>
 
       {/* PDF Upload Section */}
       <label className="cursor-pointer mb-6 flex flex-col items-center" style={!file && !isUploading? { display: 'block' } : { display: 'none' }}>
@@ -251,12 +251,13 @@ function App() {
         </div>
       )}
 
+      <div style={{display:'flex', flexDirection:'row'}}>
       {/* Text-to-Speech Section */}
       {file ?  !isLoading && (
-        <div className="mt-10">
+        <div>
           <button
             onClick={handleTextToSpeech}
-            className="bg-teal-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-teal-600 transition duration-300 ease-in-out"
+            className="videobutton ml-10 mr-10 bg-teal-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-teal-600 transition duration-300 ease-in-out"
           >
             Replay
           </button>
@@ -269,7 +270,7 @@ function App() {
       {file && audioUrl && !isLoading && !showTextBox && (
         <button
           onClick={handleHandRaise}
-          className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
+          className="videobutton bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
         >
           ✋
         </button>
@@ -278,11 +279,12 @@ function App() {
       {file && audioUrl && !isLoading && showTextBox && (
         <button
           onClick={handleHandRaise}
-          className="bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
+          className="videobutton bg-purple-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out mt-6"
         >
           Resume
         </button>
       )}
+      </div>
 
       {/* Text Input Box */}
       {showTextBox && (
@@ -291,7 +293,7 @@ function App() {
             type="text"
             value={userThoughts}
             onChange={(e) => setUserThoughts(e.target.value)}
-            placeholder="Type your thoughts..."
+            placeholder="Ask question..."
             className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
           />
           <button
