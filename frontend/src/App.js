@@ -14,7 +14,7 @@ function App() {
   const [file, setFile] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(0);
+  const [pageNumber, setPageNumber] = useState(1);
   const [message, setMessage] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +28,7 @@ function App() {
   const audioSummaryPlayer = useRef(null);
   const [isChangingPageNum, setIsChangingPageNum] = useState(false);
   const [audioURLARRAY, setAudioURLARRAY] = useState([]);
+  const [haveplayed, setHavePlayed] = useState(false);
 
   const changeFile = async (e) => {
     setSelectedFile(e.target.files[0]);
@@ -93,6 +94,7 @@ function App() {
 
   // Text-to-Speech handler
   const handleTextToSpeech = async () => {
+    setHavePlayed(true);
     if (audioSummaryPlayer.current && !audioSummaryPlayer.current.paused) {
       audioSummaryPlayer.current.pause();
     }
@@ -253,7 +255,19 @@ function App() {
 
       <div style={{display:'flex', flexDirection:'row'}}>
       {/* Text-to-Speech Section */}
-      {file ?  !isLoading && (
+      {file ?  !isLoading && !haveplayed && (
+        <div>
+          <button
+            onClick={handleTextToSpeech}
+            className="videobutton ml-10 mr-10 bg-blue-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-teal-600 transition duration-300 ease-in-out"
+          >
+            Play
+          </button>
+        </div>
+      ) : (
+        <div></div>
+      )}
+      {file ?  !isLoading && haveplayed &&(
         <div>
           <button
             onClick={handleTextToSpeech}
