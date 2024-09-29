@@ -41,3 +41,5 @@ When running the frontend, navigate over to the frontend folder and in your term
 When running the backend, navigate over to the "flask-server" folder and in your terminal run "python server.py". This should start up the flask server.
 
 Once both of the steps above are complete, you are ready to use Profound AI!
+
+If you want to learn more about ProFound.ai and see a demo video, click this link: https://devpost.com/software/profound-ai
